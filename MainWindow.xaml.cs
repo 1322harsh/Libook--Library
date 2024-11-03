@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 
 namespace YourNamespace
 {
@@ -9,6 +10,7 @@ namespace YourNamespace
             InitializeComponent();
         }
 
+      
         private void AdminButton_Click(object sender, RoutedEventArgs e)
         {
             var loginPage = new LoginPage("Admin");
