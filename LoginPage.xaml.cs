@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
 
 namespace YourNamespace
 {
@@ -39,7 +38,10 @@ namespace YourNamespace
 
         private void SignUp_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Sign Up functionality not implemented.");
+            // Open the signup page with the userType
+            SignupPage signupPage = new SignupPage(userType);
+            signupPage.Show();
+            this.Hide(); // Hide the login page
         }
     }
 }
