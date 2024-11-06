@@ -33,7 +33,10 @@ namespace YourNamespace
 
         private void ForgotPassword_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Forgot Password functionality not implemented.");
+            // Open the signup page with the userType
+            ForgotPasswordPage forgotpassword = new ForgotPasswordPage(userType);
+            forgotpassword.Show();
+            this.Hide(); // Hide the login page
         }
 
         private void SignUp_Click(object sender, RoutedEventArgs e)

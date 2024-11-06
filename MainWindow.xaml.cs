@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 
+
 namespace YourNamespace
 {
     public partial class WelcomePage : Window
