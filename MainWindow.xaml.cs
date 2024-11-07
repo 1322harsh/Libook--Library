@@ -1,5 +1,4 @@
-﻿using LibookApp;
-using System;
+﻿using System;
 using System.Windows;
 
 
@@ -13,14 +12,17 @@ namespace YourNamespace
         }
 
 
-        private void AdminLoginButton_Click(object sender, RoutedEventArgs e)
+        // Admin button click handler
+        private void AdminButton_Click(object sender, RoutedEventArgs e)
         {
             // Open the AdminLogin window
             AdminLogin adminLoginWindow = new AdminLogin();
             adminLoginWindow.Show();
-        } // Show the AdminLogin window
+            //this.Close(); // Optionally close the WelcomePage window
+        }
 
-            private void UserButton_Click(object sender, RoutedEventArgs e)
+
+        private void UserButton_Click(object sender, RoutedEventArgs e)
         {
             var loginPage = new LoginPage("User");
             loginPage.Show();

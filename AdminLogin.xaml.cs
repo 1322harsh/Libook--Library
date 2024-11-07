@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using YourNamespace;
 
-namespace LibookApp  // Make sure this matches the namespace in your project
+namespace YourNamespace // Make sure this matches the namespace in your project
 {
     public partial class AdminLogin : Window  // The class name should match the XAML file's class name
     {
@@ -27,5 +27,13 @@ namespace LibookApp  // Make sure this matches the namespace in your project
                 MessageBox.Show("Invalid username or password.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+         
+            this.Close(); // Optionally close the WelcomePage window
+        }
+
+        
     }
 }
