@@ -18,7 +18,7 @@ namespace YourNamespace
             // Open the AdminLogin window
             AdminLogin adminLoginWindow = new AdminLogin();
             adminLoginWindow.Show();
-            //this.Close(); // Optionally close the WelcomePage window
+            this.Close(); // Optionally close the WelcomePage window
         }
 
 

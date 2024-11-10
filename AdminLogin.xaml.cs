@@ -30,8 +30,10 @@ namespace YourNamespace // Make sure this matches the namespace in your project
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-         
-            this.Close(); // Optionally close the WelcomePage window
+
+            WelcomePage welcomepage = new WelcomePage();
+            welcomepage.Show();
+            this.Hide(); // Hide the login page
         }
 
         

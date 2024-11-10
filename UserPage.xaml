@@ -1,9 +1,65 @@
 ﻿<Window x:Class="YourNamespace.UserPage"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Libook" Height="200" Width="300">
-    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-        <TextBlock x:Name="WelcomeTextBlock" FontSize="20" Margin="0,0,0,20"/>
-        <Button Content="Log Out" Click="LogOut_Click" Margin="10"/>
-    </StackPanel>
+        Title="UserPage" Height="600" Width="800" WindowState="Maximized">
+    <Grid Background="#F2F2D0">
+        <!-- Light background color (#F2F2D0) -->
+
+        <!-- Sidebar -->
+        <StackPanel Orientation="Vertical" Background="#002A5A" Width="150" HorizontalAlignment="Left">
+            <Ellipse Width="60" Height="60" Fill="#FF4500" Margin="10"/>
+            <!-- Orange profile icon -->
+            <TextBlock Text="User" HorizontalAlignment="Center" Margin="0,10,0,0" Foreground="White"/>
+
+            <Button Content="My Books" HorizontalAlignment="Center" Margin="0,20,0,0" Background="#002A5A" Foreground="White"/>
+            <Button Content="All Books" HorizontalAlignment="Center" Margin="0,10,0,0" Background="#002A5A" Foreground="White"/>
+        </StackPanel>
+
+        <!-- Top Bar -->
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,10,0,0">
+            <!-- Search Bar -->
+            <TextBox Width="400" Height="30" Background="#002A5A" Foreground="White" Text="Search bar" HorizontalAlignment="Center"/>
+            <!-- Notification Circle -->
+            <Ellipse Width="30" Height="30" Fill="#002A5A" Margin="10,0,0,0"/>
+        </StackPanel>
+
+        <!-- Main Content Area -->
+        <Grid Margin="160,60,10,10">
+            <!-- Margin to leave space for sidebar and top bar -->
+
+            <!-- All Books List -->
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10,0,0">
+                <TextBlock Text="All Books" FontSize="16" FontWeight="Bold" Margin="0,0,0,10" Foreground="#002A5A"/>
+
+                <!-- Book Entry Example -->
+                <StackPanel Orientation="Horizontal" Background="White" Margin="5" >
+                    <TextBlock Text="Book ID: 1234" Width="100" Foreground="#002A5A"/>
+                    <TextBlock Text="Status: Available" Width="100" Foreground="#002A5A"/>
+                    <Button Content="Prebook" Width="80" Margin="5,0" Background="#FF4500" Foreground="White"/>
+                    <Button Content="Issue" Width="80" Margin="5,0" Background="#FF4500" Foreground="White"/>
+                    <Button Content="Return" Width="80" Margin="5,0" Background="#FF4500" Foreground="White"/>
+                </StackPanel>
+
+                <!-- Additional book entries go here -->
+            </StackPanel>
+
+            <!-- My Books List -->
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,10,0,0">
+                <TextBlock Text="My Books" FontSize="16" FontWeight="Bold" Margin="0,0,0,10" Foreground="#002A5A"/>
+
+                <!-- Book Entry Example -->
+                <StackPanel Orientation="Horizontal" Background="White" Margin="5">
+                    <TextBlock Text="Book ID: 5678" Width="100" Foreground="#002A5A"/>
+                    <TextBlock Text="Status: Borrowed" Width="100" Foreground="#002A5A"/>
+                    <Button Content="Return" Width="80" Margin="5,0" Background="#FF4500" Foreground="White"/>
+                </StackPanel>
+
+                <!-- Additional borrowed book entries go here -->
+            </StackPanel>
+        </Grid>
+
+        <!-- Logout Button at Bottom Left -->
+        <Button Content="Logout" HorizontalAlignment="Left" VerticalAlignment="Bottom" 
+                Background="#FF4500" Foreground="White" Height="30" Width="80" Margin="10" Click="LogoutButton_Click" />
+    </Grid>
 </Window>

@@ -15,7 +15,6 @@ namespace YourNamespace
 
         private void Login_Click(object sender, RoutedEventArgs e)
         {
-            // Logic for authentication (simplified for example)
             string username = UsernameTextBox.Text;
             string password = PasswordBox.Password;
 
@@ -26,7 +25,8 @@ namespace YourNamespace
             }
 
             // Assume login is successful for demonstration
-            var userPage = new UserPage(userType, username);
+            string userType = "standard"; // Set or retrieve userType as needed
+            UserPage userPage = new UserPage(userType, username);
             userPage.Show();
             this.Hide(); // Hide the login page
         }
