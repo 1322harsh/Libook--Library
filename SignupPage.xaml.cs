@@ -1,4 +1,7 @@
 ﻿using System.Windows;
+using System;
+using System.Data.SqlClient;
+using System.Configuration;
 
 namespace YourNamespace
 {
@@ -16,42 +19,74 @@ namespace YourNamespace
         // Event handler for the Sign Up button
         private void SignUp_Click(object sender, RoutedEventArgs e)
         {
-            // Validate the input fields
-            if (string.IsNullOrWhiteSpace(UsernameTextBox.Text) ||
-                string.IsNullOrWhiteSpace(EmailTextBox.Text) ||
-                string.IsNullOrWhiteSpace(PasswordBox.Password) ||
-                string.IsNullOrWhiteSpace(ConfirmPasswordBox.Password))
-            {
-                MessageBox.Show("Please fill in all fields.", "Input Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
+            string connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=Libook;Integrated Security=True;";
 
-            // Check if passwords match
-            if (PasswordBox.Password != ConfirmPasswordBox.Password)
-            {
-                MessageBox.Show("Passwords do not match.", "Input Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            // Here you would typically hash the password and store user information in the database
-            string username = UsernameTextBox.Text;
+            string name = User_name.Text;
             string email = EmailTextBox.Text;
-            string password = PasswordBox.Password; // You should hash this before storing
+            string password = PasswordBox.Password;
+            string securityQuestion = SecurityQuestionComboBox.SelectedItem.ToString();
+            string answer = SecurityAnswerTextBox.Text;
 
-            // Simulate user registration (you can replace this with actual database logic)
-            bool registrationSuccessful = RegisterUser(username, email, password);
+            // Show message with randomly generated UserID (for display only)
+            Random random = new Random();
+            int userId = random.Next(1000, 9999);
+            string message = $"UserID: {userId}\nName: {name}\nEmail: {email}\nSecurity Question: {securityQuestion}\nAnswer: {answer}\n\n" +
+                             "Do you want to proceed with these details?";
 
-            if (registrationSuccessful)
+            MessageBoxResult result = MessageBox.Show(message, "Confirm Signup", MessageBoxButton.YesNo);
+
+            if (result == MessageBoxResult.Yes)
             {
-                MessageBox.Show("Registration successful!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-                // Optionally navigate to the login page
-                this.Close(); // Close the signup page
+                string checkUserQuery = "SELECT COUNT(1) FROM Users WHERE Email = @Email";
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    SqlCommand checkUserCommand = new SqlCommand(checkUserQuery, connection);
+                    checkUserCommand.Parameters.AddWithValue("@Email", email);
+
+                    try
+                    {
+                        connection.Open();
+                        int userExists = (int)checkUserCommand.ExecuteScalar();
+
+                        if (userExists > 0)
+                        {
+                            MessageBox.Show("This email is already registered. Please try again.");
+                            return;
+                        }
+
+                        // Insert query WITHOUT UserID column (let SQL Server handle it)
+                        string query = "INSERT INTO Users (Name, Email, Password, SecurityQuestion, SecurityAnswer, Role) " +
+                                       "VALUES (@Name, @Email, @Password, @SecurityQuestion, @SecurityAnswer, @Role);" +
+                                       "SELECT SCOPE_IDENTITY();"; // Get the generated UserID
+
+                        SqlCommand command = new SqlCommand(query, connection);
+                        command.Parameters.AddWithValue("@Name", name);
+                        command.Parameters.AddWithValue("@Email", email);
+                        command.Parameters.AddWithValue("@Password", password);
+                        command.Parameters.AddWithValue("@SecurityQuestion", securityQuestion);
+                        command.Parameters.AddWithValue("@SecurityAnswer", answer);
+                        command.Parameters.AddWithValue("@Role", "User");  // Default role
+
+                        // Retrieve the generated UserID
+                        int newUserId = Convert.ToInt32(command.ExecuteScalar());
+
+                        // Show the UserID
+                        MessageBox.Show($"User signup successful!\nYour UserID is: {newUserId}");
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("An error occurred: " + ex.Message);
+                    }
+                }
             }
             else
             {
-                MessageBox.Show("Registration failed. Please try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Signup process canceled.");
             }
         }
+
+
 
         // Event handler for the Login button
         private void Login_Click(object sender, RoutedEventArgs e)

@@ -20,8 +20,8 @@
                    Margin="10,10,0,0"/>
 
             <!-- Username field -->
-            <TextBlock Text="Username" FontSize="14" Foreground="#F2F2D0" Margin="0,0,0,5"/>
-            <TextBox Name="UsernameTextBox" Height="40" Margin="0,0,0,15"
+            <TextBlock Text="Name" FontSize="14" Foreground="#F2F2D0" Margin="0,0,0,5"/>
+            <TextBox Name="User_name" Height="40" Margin="0,0,0,15"
                      Background="#F2F2D0" Foreground="#002A5A" BorderThickness="0"
                      Padding="10,5"/>
 
