@@ -1,22 +1,28 @@
 ﻿<Window x:Class="YourNamespace.LoginPage"
-xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Libook" Height="500" Width="400"
         WindowState="Maximized"
         Background="#002A5A">
 
     <Grid>
-        <!-- "Libook" in the top left corner with larger font size -->
+        <!-- "Libook" title (if you want to keep it visible) -->
         <TextBlock Text="Libook" FontSize="24" FontWeight="Bold" Foreground="White"
                    HorizontalAlignment="Left" VerticalAlignment="Top"
                    Margin="10,10,0,0"/>
-
         <!-- Centered StackPanel for login form -->
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="300">
 
-            <!-- Placeholder icon (use Image if you have an icon image) -->
-            <Ellipse Width="80" Height="80" Stroke="White" StrokeThickness="2"
-                     HorizontalAlignment="Center" Margin="0,0,0,20"/>
+            <!-- Back Button with characteristics similar to Forgot Password -->
+            <TextBlock Text="Back" FontSize="12" Foreground="LightBlue"
+                      HorizontalAlignment="Left" Margin="0,0,0,15" Cursor="Hand"
+                      MouseDown="Back_Click"/>
+
+          
+
+            <!-- "Login" text inside the form -->
+            <TextBlock Text="Login" FontSize="24" FontWeight="Bold" Foreground="White"
+                   HorizontalAlignment="Center" Margin="10,10,0,0"/>
 
             <!-- Username field -->
             <TextBlock Text="Username" FontSize="14" Foreground="#F2F2D0" Margin="0,0,0,5"/>
@@ -30,19 +36,17 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                          Background="#F2F2D0" Foreground="#002A5A" BorderThickness="0"
                          Padding="10,5"/>
 
-            <!-- "Forgot Password?" link aligned to the right of the PasswordBox -->
+            <!-- Forgot Password? link -->
             <TextBlock Text="Forgot Password?" FontSize="12" Foreground="LightBlue"
                        HorizontalAlignment="Right" Margin="0,0,0,10" Cursor="Hand"
                        MouseDown="ForgotPassword_Click"/>
 
-            <!-- Buttons layout with Login and Sign Up half the width of the PasswordBox -->
+            <!-- Buttons layout -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-                <!-- Login Button -->
                 <Button Content="Login" Width="140" Height="40" Background="#FF4500"
                         Foreground="White" FontSize="16" BorderThickness="0"
                         Margin="0,0,10,0" Click="Login_Click"/>
 
-                <!-- Sign Up Button -->
                 <Button Content="Sign Up" Width="140" Height="40" Background="#FF4500"
                         Foreground="White" FontSize="16" BorderThickness="0"
                         Click="SignUp_Click"/>

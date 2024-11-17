@@ -33,7 +33,6 @@ namespace YourNamespace
 
         private void ForgotPassword_Click(object sender, RoutedEventArgs e)
         {
-            // Open the signup page with the userType
             ForgotPasswordPage forgotpassword = new ForgotPasswordPage(userType);
             forgotpassword.Show();
             this.Hide(); // Hide the login page
@@ -41,10 +40,18 @@ namespace YourNamespace
 
         private void SignUp_Click(object sender, RoutedEventArgs e)
         {
-            // Open the signup page with the userType
             SignupPage signupPage = new SignupPage(userType);
             signupPage.Show();
             this.Hide(); // Hide the login page
+        }
+
+        // Back button click event
+        private void Back_Click(object sender, RoutedEventArgs e)
+        {
+            // Show the MainWindow and close the login window
+            WelcomePage mainWindow = new WelcomePage();
+            mainWindow.Show();
+            this.Close(); // Close the login page
         }
     }
 }

@@ -1,7 +1,6 @@
-﻿using System.Windows;
-using System;
+﻿using System;
 using System.Data.SqlClient;
-using System.Configuration;
+using System.Windows;
 
 namespace YourNamespace
 {
@@ -24,69 +23,66 @@ namespace YourNamespace
             string name = User_name.Text;
             string email = EmailTextBox.Text;
             string password = PasswordBox.Password;
-            string securityQuestion = SecurityQuestionComboBox.SelectedItem.ToString();
+            string securityQuestion = SecurityQuestionComboBox.SelectedItem?.ToString();
             string answer = SecurityAnswerTextBox.Text;
 
-            // Show message with randomly generated UserID (for display only)
-            Random random = new Random();
-            int userId = random.Next(1000, 9999);
-            string message = $"UserID: {userId}\nName: {name}\nEmail: {email}\nSecurity Question: {securityQuestion}\nAnswer: {answer}\n\n" +
-                             "Do you want to proceed with these details?";
-
-            MessageBoxResult result = MessageBox.Show(message, "Confirm Signup", MessageBoxButton.YesNo);
-
-            if (result == MessageBoxResult.Yes)
+            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password) ||
+                string.IsNullOrWhiteSpace(securityQuestion) || string.IsNullOrWhiteSpace(answer))
             {
-                string checkUserQuery = "SELECT COUNT(1) FROM Users WHERE Email = @Email";
+                MessageBox.Show("Please fill in all the fields.");
+                return;
+            }
 
-                using (SqlConnection connection = new SqlConnection(connectionString))
+            string checkUserQuery = "SELECT COUNT(1) FROM Users WHERE Email = @Email";
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                SqlCommand checkUserCommand = new SqlCommand(checkUserQuery, connection);
+                checkUserCommand.Parameters.AddWithValue("@Email", email);
+
+                try
                 {
-                    SqlCommand checkUserCommand = new SqlCommand(checkUserQuery, connection);
-                    checkUserCommand.Parameters.AddWithValue("@Email", email);
+                    connection.Open();
+                    int userExists = (int)checkUserCommand.ExecuteScalar();
 
-                    try
+                    if (userExists > 0)
                     {
-                        connection.Open();
-                        int userExists = (int)checkUserCommand.ExecuteScalar();
+                        MessageBox.Show("This email is already registered. Please try again.");
+                        return;
+                    }
 
-                        if (userExists > 0)
-                        {
-                            MessageBox.Show("This email is already registered. Please try again.");
-                            return;
-                        }
+                    // Insert query (UserID will auto-increment)
+                    string query = "INSERT INTO Users (Name, Email, Password, SecurityQuestion, SecurityAnswer, Role) " +
+                                   "VALUES (@Name, @Email, @Password, @SecurityQuestion, @SecurityAnswer, @Role);" +
+                                   "SELECT SCOPE_IDENTITY();"; // Get the generated UserID
 
-                        // Insert query WITHOUT UserID column (let SQL Server handle it)
-                        string query = "INSERT INTO Users (Name, Email, Password, SecurityQuestion, SecurityAnswer, Role) " +
-                                       "VALUES (@Name, @Email, @Password, @SecurityQuestion, @SecurityAnswer, @Role);" +
-                                       "SELECT SCOPE_IDENTITY();"; // Get the generated UserID
+                    SqlCommand command = new SqlCommand(query, connection);
+                    command.Parameters.AddWithValue("@Name", name);
+                    command.Parameters.AddWithValue("@Email", email);
+                    command.Parameters.AddWithValue("@Password", password);
+                    command.Parameters.AddWithValue("@SecurityQuestion", securityQuestion);
+                    command.Parameters.AddWithValue("@SecurityAnswer", answer);
+                    command.Parameters.AddWithValue("@Role", "User"); // Default role
 
-                        SqlCommand command = new SqlCommand(query, connection);
-                        command.Parameters.AddWithValue("@Name", name);
-                        command.Parameters.AddWithValue("@Email", email);
-                        command.Parameters.AddWithValue("@Password", password);
-                        command.Parameters.AddWithValue("@SecurityQuestion", securityQuestion);
-                        command.Parameters.AddWithValue("@SecurityAnswer", answer);
-                        command.Parameters.AddWithValue("@Role", "User");  // Default role
+                    // Retrieve the generated UserID
+                    object result = command.ExecuteScalar();
+                    int newUserId = result != DBNull.Value ? Convert.ToInt32(result) : 0;
 
-                        // Retrieve the generated UserID
-                        int newUserId = Convert.ToInt32(command.ExecuteScalar());
-
-                        // Show the UserID
+                    if (newUserId == 0)
+                    {
+                        MessageBox.Show("User signup successful, but the UserID could not be retrieved.");
+                    }
+                    else
+                    {
                         MessageBox.Show($"User signup successful!\nYour UserID is: {newUserId}");
                     }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("An error occurred: " + ex.Message);
-                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("An error occurred: " + ex.Message);
                 }
             }
-            else
-            {
-                MessageBox.Show("Signup process canceled.");
-            }
         }
-
-
 
         // Event handler for the Login button
         private void Login_Click(object sender, RoutedEventArgs e)
@@ -95,13 +91,6 @@ namespace YourNamespace
             LoginPage loginPage = new LoginPage(userType);
             loginPage.Show();
             this.Close(); // Close the signup page
-        }
-
-        // Dummy method to simulate user registration
-        private bool RegisterUser(string username, string email, string password)
-        {
-            // TODO: Implement actual user registration logic (e.g., save to database)
-            return true; // For demonstration, we'll just return true
         }
     }
 }
