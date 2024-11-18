@@ -18,7 +18,7 @@ namespace YourNamespace
         // Event handler for the Sign Up button
         private void SignUp_Click(object sender, RoutedEventArgs e)
         {
-            string connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=Libook;Integrated Security=True;";
+            string connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=\"D:\\Users\\270449050\\OneDrive - UP Education\\c sharp\\Libook-(Library\\Libook.mdf\";Integrated Security=True";
 
             string name = User_name.Text;
             string email = EmailTextBox.Text;

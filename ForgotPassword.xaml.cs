@@ -50,10 +50,20 @@ namespace YourNamespace
             mainWindow.Show();
             this.Close(); // Close the login page
         }
-          
+        private bool IsValidEmail(string email)
+        {
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
+                return addr.Address == email;
+            }
+            catch
+            {
+                return false;
+            }
+        }
         private void ResetPassword_Click(object sender, RoutedEventArgs e)
         {
-            // Check if required fields are filled
             if (string.IsNullOrWhiteSpace(EmailTextBox.Text) ||
                 SecurityQuestionComboBox.SelectedItem == null ||
                 string.IsNullOrWhiteSpace(AnswerTextBox.Text) ||
@@ -62,13 +72,21 @@ namespace YourNamespace
                 MessageBox.Show("Please fill in all fields.", "Input Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+            
 
-            string emailOrUserId = EmailTextBox.Text; // Capture email or UserID
+            string emailOrUserId = EmailTextBox.Text;
+            bool isValidEmailOrUserId = IsValidEmail(emailOrUserId) || int.TryParse(emailOrUserId, out _);
+
+            if (!isValidEmailOrUserId)
+            {
+                MessageBox.Show("Please enter a valid Email or User ID.", "Input Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             string securityQuestion = SecurityQuestionComboBox.SelectedItem.ToString();
             string answer = AnswerTextBox.Text;
             string newPassword = NewPasswordBox.Password;
 
-            // Call the method to check the user's security question and answer, and reset the password
             bool resetSuccessful = ResetUserPassword(emailOrUserId, securityQuestion, answer, newPassword);
 
             if (resetSuccessful)
@@ -80,23 +98,35 @@ namespace YourNamespace
             }
             else
             {
-                MessageBox.Show("Password reset failed. Please check your email, security question, or answer.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Password reset failed. Please check your Email/UserID, security question, or answer.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
+
         private bool ResetUserPassword(string emailOrUserId, string securityQuestion, string answer, string newPassword)
         {
-            // Define your connection string
-            string connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=Libook;Integrated Security=True;";
+            string connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=\"D:\\Users\\270449050\\OneDrive - UP Education\\c sharp\\Libook-(Library\\Libook.mdf\";Integrated Security=True";
 
-            // SQL query to check if the email and security question answer match the user's record
-            string checkQuery = "SELECT COUNT(1) FROM Users WHERE (Email = @Email OR UserID = @UserID) AND SecurityQuestion = @SecurityQuestion AND SecurityAnswer = @SecurityAnswer";
+            bool isEmail = emailOrUserId.Contains("@"); // Determine if input is email
+
+            // SQL query with conditional checks for Email or UserID
+            string checkQuery = isEmail
+                ? "SELECT COUNT(1) FROM Users WHERE Email = @Email AND SecurityQuestion = @SecurityQuestion AND SecurityAnswer = @SecurityAnswer"
+                : "SELECT COUNT(1) FROM Users WHERE UserID = @UserID AND SecurityQuestion = @SecurityQuestion AND SecurityAnswer = @SecurityAnswer";
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 SqlCommand checkCommand = new SqlCommand(checkQuery, connection);
-                checkCommand.Parameters.AddWithValue("@Email", emailOrUserId);
-                checkCommand.Parameters.AddWithValue("@UserID", emailOrUserId);
+
+                if (isEmail)
+                {
+                    checkCommand.Parameters.AddWithValue("@Email", emailOrUserId);
+                }
+                else
+                {
+                    checkCommand.Parameters.AddWithValue("@UserID", Convert.ToInt32(emailOrUserId));
+                }
+
                 checkCommand.Parameters.AddWithValue("@SecurityQuestion", securityQuestion);
                 checkCommand.Parameters.AddWithValue("@SecurityAnswer", answer);
 
@@ -107,21 +137,31 @@ namespace YourNamespace
 
                     if (userExists == 0)
                     {
-                        // No matching user found, return false (reset failed)
+                        // No matching user found
                         return false;
                     }
 
-                    // Update the password for the user if the answer is correct
-                    string updateQuery = "UPDATE Users SET Password = @NewPassword WHERE (Email = @Email OR UserID = @UserID)";
+                    // Query to update password
+                    string updateQuery = isEmail
+                        ? "UPDATE Users SET Password = @NewPassword WHERE Email = @Email"
+                        : "UPDATE Users SET Password = @NewPassword WHERE UserID = @UserID";
 
                     SqlCommand updateCommand = new SqlCommand(updateQuery, connection);
-                    updateCommand.Parameters.AddWithValue("@NewPassword", newPassword); // In a real app, hash this password
-                    updateCommand.Parameters.AddWithValue("@Email", emailOrUserId);
-                    updateCommand.Parameters.AddWithValue("@UserID", emailOrUserId);
+
+                    if (isEmail)
+                    {
+                        updateCommand.Parameters.AddWithValue("@Email", emailOrUserId);
+                    }
+                    else
+                    {
+                        updateCommand.Parameters.AddWithValue("@UserID", Convert.ToInt32(emailOrUserId));
+                    }
+
+                    updateCommand.Parameters.AddWithValue("@NewPassword", newPassword);
 
                     int rowsAffected = updateCommand.ExecuteNonQuery();
 
-                    // If rowsAffected is 1, the password was updated successfully
+                    // If one row is updated, password reset is successful
                     return rowsAffected == 1;
                 }
                 catch (Exception ex)
@@ -131,5 +171,6 @@ namespace YourNamespace
                 }
             }
         }
+
     }
 }

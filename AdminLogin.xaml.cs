@@ -17,7 +17,7 @@ namespace YourNamespace // Make sure this matches the namespace in your project
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
             // Directly use your connection string here
-            string connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=Libook;Integrated Security=True;";
+            string connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=\"D:\\Users\\270449050\\OneDrive - UP Education\\c sharp\\Libook-(Library\\Libook.mdf\";Integrated Security=True";
 
             // Parse UserID input and validate it
             if (!int.TryParse(Username.Text, out int userId))
