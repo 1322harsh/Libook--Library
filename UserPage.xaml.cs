@@ -1,113 +1,272 @@
-﻿using System.Windows;
+﻿using System;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace YourNamespace
 {
     public partial class UserPage : Window
     {
-        public UserPage(string userType, string username)
+        private int currentUserId;  // Store the logged-in user's UserId as an integer
+
+        // Define your connection string here
+        private string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=""D:\Users\270449050\OneDrive - UP Education\c sharp\Libook-(Library\Libook.mdf"";Integrated Security=True";
+
+        public UserPage(string userType, string userId)
         {
             InitializeComponent();
-
-            // Setting the title based on the user type
             Title = $"{userType} User Page";
-
-          
-        
-    }
-
-    // Load all available books
-    private void LoadAllBooks()
-        {
-            // Sample data; replace with actual data retrieval logic
-            AddBookToAllBooksList("1234", "Available");
-            AddBookToAllBooksList("5678", "Borrowed");
+            currentUserId = int.Parse(userId);  // Convert UserId (string) to integer
         }
 
-        // Load user's borrowed books
-        private void LoadMyBooks()
+        // Book class to represent a book record
+        public class Book
         {
-            // Sample data; replace with actual data retrieval logic
-            AddBookToMyBooksList("5678", "Borrowed");
+            public int BookID { get; set; }
+            public string Title { get; set; }
+            public string Author { get; set; }
+            public string Genre { get; set; }
+            public int YearPublished { get; set; }
+            public DateTime? DueDate { get; set; }  // Nullable DateTime for DueDate
+            public bool IsIssued { get; set; }  // Tracks if the book is issued
         }
 
-        // Add a book to the All Books list with buttons for each action
-        private void AddBookToAllBooksList(string bookId, string status)
+        private List<Book> allBooks = new List<Book>();
+        private List<Book> myBooks = new List<Book>();
+
+        // Load All Books for the "All Books" button
+        private void LoadAllBooksFromDatabase()
         {
-            StackPanel bookPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(5), Background = System.Windows.Media.Brushes.White };
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string query = "SELECT b.BookID, b.Title, b.Author, b.Genre, b.YearPublished, t.DueDate, " +
+                                   "CASE WHEN t.TransactionType = 'Issue' THEN 1 ELSE 0 END AS IsIssued " +
+                                   "FROM Books b LEFT JOIN Transactions t ON b.BookID = t.BookID AND t.TransactionType = 'Issue' " +
+                                   "WHERE t.UserId = @UserId OR t.UserId IS NULL";
 
-            // Book information
-            TextBlock bookIdText = new TextBlock { Text = $"Book ID: {bookId}", Width = 100, Foreground = System.Windows.Media.Brushes.Blue };
-            TextBlock statusText = new TextBlock { Text = $"Status: {status}", Width = 100, Foreground = System.Windows.Media.Brushes.Blue };
+                    SqlCommand command = new SqlCommand(query, connection);
+                    command.Parameters.AddWithValue("@UserId", currentUserId);  // Pass UserId as integer
+                    SqlDataReader reader = command.ExecuteReader();
 
-            // Buttons
-            Button prebookButton = new Button { Content = "Prebook", Width = 80, Margin = new Thickness(5, 0, 0, 0), Background = System.Windows.Media.Brushes.Orange, Foreground = System.Windows.Media.Brushes.White };
-            prebookButton.Click += (sender, e) => PrebookBook(bookId);
+                    allBooks.Clear();
 
-            Button issueButton = new Button { Content = "Issue", Width = 80, Margin = new Thickness(5, 0, 0, 0), Background = System.Windows.Media.Brushes.Orange, Foreground = System.Windows.Media.Brushes.White };
-            issueButton.Click += (sender, e) => IssueBook(bookId);
+                    while (reader.Read())
+                    {
+                        allBooks.Add(new Book
+                        {
+                            BookID = reader.GetInt32(0),
+                            Title = reader.GetString(1),
+                            Author = reader.GetString(2),
+                            Genre = reader.GetString(3),
+                            YearPublished = reader.GetInt32(4),
+                            DueDate = reader.IsDBNull(5) ? (DateTime?)null : reader.GetDateTime(5),
+                            IsIssued = reader.GetInt32(6) == 1  // Check if the book is issued
+                        });
+                    }
 
-            Button returnButton = new Button { Content = "Return", Width = 80, Margin = new Thickness(5, 0, 0, 0), Background = System.Windows.Media.Brushes.Orange, Foreground = System.Windows.Media.Brushes.White };
-            returnButton.Click += (sender, e) => ReturnBook(bookId);
-
-            // Add components to panel
-            bookPanel.Children.Add(bookIdText);
-            bookPanel.Children.Add(statusText);
-            bookPanel.Children.Add(prebookButton);
-            bookPanel.Children.Add(issueButton);
-            bookPanel.Children.Add(returnButton);
-
-            // Add panel to All Books list (Assuming an ItemsControl or StackPanel is named AllBooksListPanel in XAML)
-            //AllBooksListPanel.Children.Add(bookPanel);
+                    AllBooksListView.ItemsSource = allBooks;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading books: {ex.Message}");
+            }
         }
 
-        // Add a book to My Books list with a Return button
-        private void AddBookToMyBooksList(string bookId, string status)
+        // Handle "My Books" button click
+        private void MyBooksButton_Click(object sender, RoutedEventArgs e)
         {
-            StackPanel bookPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(5), Background = System.Windows.Media.Brushes.White };
-
-            TextBlock bookIdText = new TextBlock { Text = $"Book ID: {bookId}", Width = 100, Foreground = System.Windows.Media.Brushes.Blue };
-            TextBlock statusText = new TextBlock { Text = $"Status: {status}", Width = 100, Foreground = System.Windows.Media.Brushes.Blue };
-
-            Button returnButton = new Button { Content = "Return", Width = 80, Margin = new Thickness(5, 0, 0, 0), Background = System.Windows.Media.Brushes.Orange, Foreground = System.Windows.Media.Brushes.White };
-            returnButton.Click += (sender, e) => ReturnBook(bookId);
-
-            bookPanel.Children.Add(bookIdText);
-            bookPanel.Children.Add(statusText);
-            bookPanel.Children.Add(returnButton);
-
-           // MyBooksListPanel.Children.Add(bookPanel); // Assuming MyBooksListPanel is a StackPanel in XAML
+            LoadMyBooksFromDatabase();  // Load the books borrowed by the user
+            MyBooksListView.Visibility = Visibility.Visible;  // Make sure it's visible after loading
         }
 
-        // Prebook book event handler
-        private void PrebookBook(string bookId)
+        // Load books borrowed by the logged-in user
+        private void LoadMyBooksFromDatabase()
         {
-            MessageBox.Show($"Prebooking book with ID: {bookId}");
-            // Add prebooking logic here
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    // Query to select books borrowed by the current user and that have not been returned yet
+                    string query = "SELECT b.BookID, b.Title, b.Author, b.Genre, b.YearPublished, t.DueDate " +
+                                   "FROM Books b INNER JOIN Transactions t ON b.BookID = t.BookID " +
+                                   "WHERE t.UserId = @UserId AND t.TransactionType = 'Issue' AND t.DueDate IS NULL";
+
+                    SqlCommand command = new SqlCommand(query, connection);
+                    command.Parameters.AddWithValue("@UserId", currentUserId);  // Pass UserId as integer
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    myBooks.Clear();  // Clear the previous list
+
+                    // Read the data from the reader and populate the myBooks list
+                    while (reader.Read())
+                    {
+                        myBooks.Add(new Book
+                        {
+                            BookID = reader.GetInt32(0),
+                            Title = reader.GetString(1),
+                            Author = reader.GetString(2),
+                            Genre = reader.GetString(3),
+                            YearPublished = reader.GetInt32(4),
+                            DueDate = reader.IsDBNull(5) ? (DateTime?)null : reader.GetDateTime(5)  // Get the DueDate for borrowed books
+                        });
+                    }
+
+                    // Set the ItemsSource for the ListView to display the books
+                    MyBooksListView.ItemsSource = myBooks;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle any errors that occur during the database interaction
+                MessageBox.Show($"Error loading borrowed books: {ex.Message}");
+            }
         }
 
-        // Issue book event handler
-        private void IssueBook(string bookId)
+        // Handle "Prebook" button click
+        private void PrebookBookButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show($"Issuing book with ID: {bookId}");
-            // Add issuing logic here
+            var button = sender as Button;
+            var selectedBook = button?.DataContext as Book;
+
+            if (selectedBook != null)
+            {
+                MessageBoxResult result = MessageBox.Show($"Are you sure you want to prebook the book '{selectedBook.Title}'?",
+                                                          "Prebook Book",
+                                                          MessageBoxButton.YesNo,
+                                                          MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        using (SqlConnection connection = new SqlConnection(connectionString))
+                        {
+                            connection.Open();
+
+                            // Insert prebooking record into Transactions table
+                            string query = "INSERT INTO Transactions (BookID, UserId, TransactionType, TransactionDate) " +
+                                           "VALUES (@BookID, @UserId, 'Prebook', GETDATE())";
+                            SqlCommand command = new SqlCommand(query, connection);
+                            command.Parameters.AddWithValue("@BookID", selectedBook.BookID);
+                            command.Parameters.AddWithValue("@UserId", currentUserId);  // Pass the logged-in UserId
+                            command.ExecuteNonQuery();
+                        }
+
+                        MessageBox.Show("Book prebooked successfully!");
+                        LoadAllBooksFromDatabase(); // Refresh book list to reflect the change
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error prebooking book: {ex.Message}");
+                    }
+                }
+            }
         }
 
-        // Return book event handler
-        private void ReturnBook(string bookId)
+        // Handle "Issue" button click
+        private void IssueBookButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show($"Returning book with ID: {bookId}");
-            // Add return logic here
+            var button = sender as Button;
+            var selectedBook = button?.DataContext as Book;
+
+            if (selectedBook != null && !selectedBook.IsIssued)
+            {
+                MessageBoxResult result = MessageBox.Show($"Are you sure you want to issue the book '{selectedBook.Title}'?",
+                                                          "Issue Book",
+                                                          MessageBoxButton.YesNo,
+                                                          MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    // Proceed with the book issuing logic
+                    // (Code to handle issuing the book would go here)
+                }
+            }
+            else
+            {
+                MessageBox.Show("This book is already issued. You can prebook it instead.");
+            }
         }
 
-        // Logout button event handler
-        private void LogoutButton_Click(object sender, RoutedEventArgs e)
+        // Handle "Return" button click in My Books List
+        private void ReturnBookButton_Click(object sender, RoutedEventArgs e)
         {
-            WelcomePage welcomepage = new WelcomePage();
-           welcomepage.Show();
-            this.Hide(); // Hide the login page
+            var button = sender as Button;
+            var selectedBook = button?.DataContext as Book;
 
-            
+            if (selectedBook != null)
+            {
+                MessageBoxResult result = MessageBox.Show($"Are you sure you want to return the book '{selectedBook.Title}'?",
+                                                          "Return Book",
+                                                          MessageBoxButton.YesNo,
+                                                          MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        using (SqlConnection connection = new SqlConnection(connectionString))
+                        {
+                            connection.Open();
+
+                            // Update book status to 'Available' in the Books table
+                            string updateBookQuery = "UPDATE Books SET Status = 'Available' WHERE BookID = @BookID";
+                            SqlCommand command = new SqlCommand(updateBookQuery, connection);
+                            command.Parameters.AddWithValue("@BookID", selectedBook.BookID);
+                            command.ExecuteNonQuery();
+
+                            // Update return date in the Transactions table
+                            string updateTransactionQuery = "UPDATE Transactions SET DueDate = GETDATE() WHERE BookID = @BookID AND UserId = @UserId";
+                            command = new SqlCommand(updateTransactionQuery, connection);
+                            command.Parameters.AddWithValue("@BookID", selectedBook.BookID);
+                            command.Parameters.AddWithValue("@UserId", currentUserId);
+                            command.ExecuteNonQuery();
+                        }
+
+                        MessageBox.Show("Book returned successfully!");
+                        LoadMyBooksFromDatabase(); // Refresh My Books list
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error returning book: {ex.Message}");
+                    }
+                }
+            }
+        }
+
+        // Handle "All Books" button click
+        private void AllBooksButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Load All Books
+            LoadAllBooksFromDatabase(); // Refresh the All Books list
+            AllBooksListView.Visibility = Visibility.Visible;  // Show All Books list
+        }
+
+        // SelectionChanged event handler for "AllBooksListView"
+        private void AllBooksListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (AllBooksListView.SelectedItem is Book selectedBook)
+            {
+                // Handle selection logic here, for example:
+                MessageBox.Show($"You selected the book: {selectedBook.Title}");
+            }
+        }
+
+        // SelectionChanged event handler for "MyBooksListView"
+        private void MyBooksListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (MyBooksListView.SelectedItem is Book selectedBook)
+            {
+                // Handle selection logic here, for example:
+                MessageBox.Show($"You selected the book: {selectedBook.Title}");
+            }
         }
     }
 }
