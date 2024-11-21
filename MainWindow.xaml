@@ -1,0 +1,38 @@
+﻿<Window x:Class="YourNamespace.AdminScreen"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Dashboard" Height="600" Width="800">
+    <Grid Background="#FFF9F6EE">
+        <!-- Main Frame for Navigation -->
+        <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden" />
+        <!-- Left Sidebar -->
+        <DockPanel VerticalAlignment="Stretch" HorizontalAlignment="Left" Width="200" Background="#FAFAFA">
+            <StackPanel>
+                <!-- Profile Section -->
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="0,20,0,20">
+                    <Ellipse Width="80" Height="80" Fill="Gray"/>
+                    <TextBlock Text="akhouna labib" FontSize="16" FontWeight="Bold" Margin="0,10,0,0" />
+                    <TextBlock Text="Librarian" FontSize="14" />
+                </StackPanel>
+
+                <!-- Navigation Buttons -->
+                <Button Content="Dashboard" Background="#0078D7" Foreground="White" FontSize="16" FontWeight="Bold" Margin="10" Padding="10" />
+                <Button Content="Add Books" Click="NavigateToAddBooksPage" Background="Transparent" FontSize="16" Margin="10" Padding="10" />
+                <Button Content="Edit Books" Click="NavigateToEditBooksPage" Background="Transparent" FontSize="16" Margin="10" Padding="10" />
+                <Button Content="Add Member" Click="NavigateToAddMembersPage" Background="Transparent" FontSize="16" Margin="10" Padding="10" />
+                <Button Content="Edit Member" Click="NavigateToEditMembersPage" Background="Transparent" FontSize="16" Margin="10" Padding="10" />
+
+                <!-- Logout Button -->
+                <Button Content="Logout" Background="Transparent" FontSize="16" Margin="10,30,10,10" Padding="10" HorizontalAlignment="Left" />
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Main Content Area -->
+        <StackPanel Margin="210,20,20,20">
+            <!-- Dashboard Title and Filter -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top">
+                <TextBlock Text="Dashboard" FontSize="30" FontWeight="Bold" Margin="0,0,20,0"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>
